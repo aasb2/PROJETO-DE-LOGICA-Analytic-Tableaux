@@ -1,1 +1,15 @@
-(~Q) e satisfativel?
+(A v (~A)) e tautologia?
+((P > Q) > (~R)) e refutavel?
+(B & (~B)) e satisfativel?
+((~A) > A) e insatisfativel?
+Q e consequencia logica de {((~Q) > (~P)), P}?
+((y > (~z)) > (x v z)) e satisfativel?
+((x & z) > ((x & z) v (~z))) e tautologia?
+(y & z) e consequencia logica de {(x > z), ((~z) & (x & y))}?
+(x & (y v z)) e consequencia logica de {x, (x v y), (x v z)}?
+((y > (~z)) > (x v z)) e satisfativel?
+((p v (q & r)) > ((p v q) & (p v r))) e tautologia?
+((~x) & y) e consequencia logica de {(x > y), ((~y) & (x v z)), (~z)}?
+B e consequencia logica de {((L > I) & ((~L) > M)), ((I v M) > C), (C > B)}?
+(((y > x) > x) > x) e insatisfativel?
+(((x & y) v (x & (~y))) v (((~x) & y) v ((~x) & (~y)))) e tautologia?

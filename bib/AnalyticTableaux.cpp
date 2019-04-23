@@ -176,7 +176,7 @@ bool Node::checkContradiction()
 {
     for (Node *it = this->parent; it != nullptr; it = it->parent)
     {
-        if (it->expression == this->expression && it->truthValue == !this->truthValue)
+        if ((it->expression == this->expression && it->truthValue == !this->truthValue) || it->isContradictory)
             return true;
     }
     return false;
