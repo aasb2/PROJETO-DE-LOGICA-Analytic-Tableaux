@@ -2,13 +2,13 @@
 #include "bib/AnalyticTableaux.cpp"
 using namespace std;
 
+//Função responsável por achar o operador principal de uma expressão
 int findMainOperator(const string & proposition){
 
     int left_parentesis =0;
     int right_parentesis = 0;
     bool begin = true;
 
-    //cout<<"SIZE = "<<proposition.size()<<endl;
 
     for(int i=0; i<proposition.size(); i++){
 
@@ -30,57 +30,11 @@ int findMainOperator(const string & proposition){
   
 }
 
-string convert_expression(string &expression1, string &expression2){
-    expression2.erase(0,1);
-    expression2.pop_back();
-    expression2.insert(1,"(");
-    string expression;
-    size_t pos;
-    do{
-        pos = expression2.find(',');
-        //cout<<"I AM HERE"<< endl;
-        //cout<<"expression2 = "<<expression2<<endl;
-        if(pos != string::npos){
-            //cout<<"IT IS NOT FAILLING IET"<<endl;
-            //cout<<"pos = "<<pos<<endl;
-            //expression2.insert(1,"(");
-            expression = expression2.substr(pos+2,string::npos);
-            expression2.insert(1,"(");
-            size_t pos2 = expression.find(',');
-            if(pos2!=string::npos)
-                expression.insert(pos2,")");
-            else
-                expression.push_back(')');
-            //expression+=" )";
-            //cout<<"*"<<endl;
-            expression2.erase(pos+1,string::npos);
-            //cout<<"/"<<endl;
-            expression2 += " & ";
-            //cout<<'!'<<endl;
-            expression2+=expression;
-            //cout<<'+'<<endl;
-            
-
-        }
-
-    }while(pos!=string::npos);
-
-
-    
-    expression2 += " & (~";
-    expression2+=expression1;
-    expression2.push_back(')');
-    expression2.push_back(')');
-
-    return expression2;
-
-}
-
+//Função responsável por tratar os problemas de consequência lógica, encontrando as expressões e as inserindo na árvore
 void convert_expression2(string & expression, Node &node){
-   //cout<<"something"<<endl;
+ 
     expression.erase(0,1);
     expression.pop_back();
-    //cout<<"!"<<expression<<"!"<<endl;
     int i=0;
     string aux;
     size_t pos;
@@ -96,11 +50,7 @@ void convert_expression2(string & expression, Node &node){
                 return;
             }
         }
-        //cout<<"aux ="<<' ';
-        //cout<<aux<<endl;
-        //cout<<"exp ="<<' ';
-        //cout<<expression<<endl;
-        //cout<<"tree "<<" ";
+    
         
   
     }while(pos!=string::npos);
@@ -109,9 +59,10 @@ void convert_expression2(string & expression, Node &node){
                 insertedNodes[0]->markContradiction();
                 return;
     }
-    //node->printTree();
+   
 }
 
+//Função resporsável por dividir a expressão recebida e retornar o operador principal
 char divideExpression(string &expression, string & subExpression1, string &subExpression2){
 
     int position = findMainOperator(expression);
@@ -135,6 +86,7 @@ char divideExpression(string &expression, string & subExpression1, string &subEx
     return '\0';
 }
 
+//Função responsável por separar a questão da expressão
 string separateQuestionAndExpression(string &expression, string &expression2){
     
     int pos = expression.find('e');
@@ -151,7 +103,7 @@ string separateQuestionAndExpression(string &expression, string &expression2){
     return question;
 }
 
-
+//Função responsável por aplicar as regras e retornar os nós inseridos
 vector<Node*>applyRule(Node *node){
         vector<Node*> insertedNodes;
         string expression = node->getExpression();
@@ -189,41 +141,7 @@ vector<Node*>applyRule(Node *node){
 }
 
 
-vector<Node*>aplyRule(Node *node, string subExpression1,string subExpression2, char op){
-        vector<Node*> insertedNodes;
-        if(op == '~'){
-            if(node->getTruthValue())
-                insertedNodes = node->insertFront(subExpression1,false);
-            else
-                insertedNodes = node->insertFront(subExpression1,false);
-        }
-        else if(op == '&'){
-            if(node->getTruthValue())
-                insertedNodes = node->insertFront(subExpression1,true,subExpression2,true);
-            else
-                insertedNodes = node->insertSides(subExpression1,false,subExpression2,false);
-        }
-        else if(op == 'v'){
-            if(node->getTruthValue())
-                insertedNodes = node->insertSides(subExpression1,true,subExpression2,true);
-            else
-                insertedNodes = node->insertFront(subExpression1,false,subExpression2,false);
-        }
-        else if(op == '>'){
-            if(node->getTruthValue())
-                insertedNodes = node->insertSides(subExpression1,false,subExpression2,true);
-            else
-                insertedNodes = node->insertFront(subExpression1,true,subExpression2,false);
-        }
-        node->markApplied();
-        if(node->checkContradiction())
-            node->markContradiction();
-        
-        return insertedNodes;
-}
-
-
-
+//Função respónsável por checar se há contradição em algum dos nós inseridos
 void checkContradictions(vector<Node*> & insertedNodes){
     for(int i=0; i<insertedNodes.size(); i++){
         if(insertedNodes[i]->checkContradiction())
@@ -231,18 +149,18 @@ void checkContradictions(vector<Node*> & insertedNodes){
     }
 }
 
+//Função responsável por verificar se aplicação da regra em determinado nó bifurca a árvore
 bool checkDivergence(Node * node){
     string expression = node->getExpression();
-    string subExpression1, subExpression2;
-    char op = divideExpression(expression,subExpression1,subExpression2);
-    if(op=='~')
+    int op = findMainOperator(expression);
+    if(expression.at(op)=='~')
         return true;
     else if(!(node->getTruthValue())){
-        if(op== '>' || op == 'v')
+        if(expression.at(op)== '>' || expression.at(op) == 'v')
             return true;
     }
     else if(node->getTruthValue()){
-        if(op == '&')
+        if(expression.at(op) == '&')
             return true;
     }
         return false;
@@ -257,18 +175,18 @@ int main(){
     string expression, expression2,subExpression1, subExpression2, question;
     int counter = 0;
     ifstream Entrada("Entrada.in");
+    ofstream Saida("Saida.out");
     int size;
-    string str;
 
-    if(Entrada.is_open()){
-        getline(Entrada,str);
+    if(Entrada.is_open() && Saida.is_open()){
+        Entrada>>size;
+        Entrada.ignore();
         while(getline(Entrada,expression)){
-            //cout<<expression<<endl<<endl;
+         
             cout<<"Problema #"<<++counter<<endl;
+	    Saida<<"Problema #"<<counter<<endl;
             question = separateQuestionAndExpression(expression, expression2);
-            //cout<<"QUESTION is = "<<question<<endl;
-            //cout<<"EXPRESSION is = "<<expression<<endl;
-            //cout<<"EXPRESSION2 is = "<<expression2<<endl;
+     
 
             
             Node tableaux(expression, false);
@@ -280,13 +198,9 @@ int main(){
                 tableaux = Node(expression,false);
             else if(question == "e insatisfativel?")
                 tableaux = Node(expression,true);
-            else if(question == "e insatisfativel?")
-                tableaux = Node(expression,true);
             else if(question == "e consequencia logica de"){
-                //cout<<"something"<<endl;
                 tableaux = Node(expression,false);
                 convert_expression2(expression2,tableaux);
-                //tableaux.printTree();
             }
             else
                 cout<<"Sorry i've not understood your question, please try again."<<endl;
@@ -296,39 +210,49 @@ int main(){
             Node* node;
             
             while(!tableaux.isClosed() && !appliableNodes.empty()){
-                //tableaux.printTree();
-
                 bool  notDiverge = false ;
+		//Verifica se a regra que será aplicada bifurca a árvore bifurca árvore, e procura pelo nó que não irá bifurcar a árvore depois da aplicação da regra
+		//Caso não encontre a regra será aplicada no último nó d
                 for(int i=0; i< appliableNodes.size() && !notDiverge; i++){
                     node = appliableNodes[i];
                     notDiverge = checkDivergence(node);
                 }
-                //cout<<"EXPRESSION = "<<node->getExpression()<<endl;
                 insertedNodes = applyRule(node);
                 checkContradictions(insertedNodes);
-                appliableNodes = tableaux.getAppliableNodes();
-                
+                appliableNodes = tableaux.getAppliableNodes();                
             }
-            if(question == "e satisfativel?")
+            if(question == "e satisfativel?"){
                     tableaux.isClosed() ? cout<<"Nao, nao e satisfativel."<<endl : cout<<"Sim, e satisfativel."<<endl; 
-            else if( question == "e refutavel?")   
+		    tableaux.isClosed() ? Saida<<"Nao, nao e satisfativel."<<endl : Saida<<"Sim, e satisfativel."<<endl; 
+	   }
+            else if( question == "e refutavel?"){   
                 tableaux.isClosed() ? cout<<"Nao, nao e refutavel."<<endl : cout<<"Sim, e refutavel."<<endl;
-            else if( question == "e tautologia?")
+		tableaux.isClosed() ? Saida<<"Nao, nao e refutavel."<<endl : Saida<<"Sim, e refutavel."<<endl;
+	    }
+            else if( question == "e tautologia?"){
                 tableaux.isClosed() ? cout<<"Sim, e tautologia."<<endl : cout<<"Nao, nao e tautologia."<<endl;
-            else if(question == "e insatisfativel?") 
-                tableaux.isClosed() ? cout<<"Sim, e insatisfativel."<<endl : cout<<"Nao, nao e insatisfativel."<<endl;
-            else if(question == "e insatisfativel?")
-                tableaux.isClosed() ? cout<<"Sim, e insatisfativel."<<endl : cout<<"Nao, nao e insatisfativel."<<endl;  
-            else if(question == "e consequencia logica de")
+ 		tableaux.isClosed() ? Saida<<"Sim, e tautologia."<<endl : Saida<<"Nao, nao e tautologia."<<endl;
+	    }
+ 
+            else if(question == "e insatisfativel?"){
+                tableaux.isClosed() ? cout<<"Sim, e insatisfativel."<<endl : cout<<"Nao, nao e insatisfativel."<<endl; 
+ 		tableaux.isClosed() ? Saida<<"Sim, e insatisfativel."<<endl : Saida<<"Nao, nao e insatisfativel."<<endl; 
+	    }
+            else if(question == "e consequencia logica de"){
                 tableaux.isClosed() ? cout<<"Sim, e consequencia logica."<<endl : cout<<"Nao, nao e consequencia logica."<<endl;
+ 		tableaux.isClosed() ? Saida<<"Sim, e consequencia logica."<<endl : Saida<<"Nao, nao e consequencia logica."<<endl;
+	    }
                     
             else{
                 cout<<"Sorry i've not understood your question, please try again."<<endl;
             }
-cout<<endl;
-
+    if(counter!=size){
+	    cout<<endl;
+	    Saida<<endl;
+    }
         }
         Entrada.close();
+	Saida.close();
     }
 
     
