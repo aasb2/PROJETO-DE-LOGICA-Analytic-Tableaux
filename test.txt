@@ -1,0 +1,3 @@
+2
+(G > (D v E)) e consequencia logica de {((~A) v B), ((A v C) & (B > D)), (C > (E v D))}?
+((A v (C & D)) > (D & A)) e consequencia logica de {(~C), (A > D)}?
